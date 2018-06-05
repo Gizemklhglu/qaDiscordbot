@@ -1,4 +1,5 @@
 const Discord = require('discord.js'); 
+const fs = require('fs'); 
 const prefix = '!'; // message prefix
 const parsbot = new Discord.Client();
 
@@ -23,9 +24,10 @@ parsbot.on('message', message => { // get messages
         else
         {
         var help_image = "https://i.imgsafe.org/5c/5c35c8adf3.png";
+        var color = "1C8ADB";
         const embed = new Discord.RichEmbed() // define embed and send
             .setThumbnail(help_image)
-            .setColor(1C8ADB)
+            .setColor(color)
             .setAuthor('Komutlar:')
             .addField('Yardım', 'Kullanımı: !yardım')
             message.channel.send(embed);
