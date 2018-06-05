@@ -4,7 +4,7 @@ const moment = require('moment');
 const prefix = '!'; // message prefix
 const parsbot = new Discord.Client();
 
-parsbot.login('NDA5NDI5MzkzNDU1NDQ4MDY0.DfgBsw._aThU57fFtAAdIRDFGwqSUAItlQ'); // discord token login
+parsbot.login(''); // discord token login
 
 parsbot.on('ready', () => { // ready control
     console.log('Parsbot started')
@@ -35,9 +35,9 @@ parsbot.on('message', message => { // get messages
                 .setThumbnail(help_image)
                 .setColor(color)
                 .setAuthor('Komutlar:')
-                .addField('Yardım', 'Kullanımı: !yardım')
                 .addField('Soru Ekle', 'Kullanımı: !soruekle, soru metni, cevap metni ')
                 .addField('Soruları Listele', 'Kullanımı: !sorulistele')
+                .addField('Soruların Tümünü Sil', 'Kullanımı: !sorusilall')
                 message.channel.send(embed);
         }
     } // help command end
@@ -86,13 +86,32 @@ parsbot.on('message', message => { // get messages
 
                 let questiondata = listQuestions(); // get questions
                 let count = Object.keys(questiondata.questions).length;
-
-                for (i = 0; i < count; i++) { // add questions
-                    embed.addField('Soru id: ' + i, 'Soru: ' + questiondata.questions[i].soru + ' Cevap: ' + questiondata.questions[i].cevap + ' Ekleyen Kullanıcı: ' + questiondata.questions[i].ekleyenkullanici);
+                if(count!=0){
+                    for (i = 0; i < count; i++) { // add questions
+                        embed.addField('Soru id: ' + i, 'Soru: ' + questiondata.questions[i].soru + ' Cevap: ' + questiondata.questions[i].cevap + ' Ekleyen Kullanıcı: ' + questiondata.questions[i].ekleyenkullanici);
+                    }
+                }else{
+                    embed.addField(" Şu an eklenmiş bir soru bulunmaktadır."," !soruekle, soru metni, cevap metni şeklinde yeni soru ekleyebilirsiniz")
                 }
                 message.channel.send(embed);
         }
     } // list question command end
+
+    else if (msg.startsWith(prefix + 'sorusilall')) { // delete questions command start
+        if(!message.member.roles.find(r=>["Parsbot"].includes(r.name)))
+        {
+            message.channel.send(sender + " botu kullanım yetkiniz yok")
+        }
+        else
+        {
+            writeLog("Soruların Tümünü Sil");
+            // command process
+            if(deleteAllQuestions())
+                {
+                    message.channel.send(sender + " Soruların tümü başarıyla silindi")
+                }
+        }
+    } // delete questions command end
     
     function writeLog(islem) {
         let log = {  // log data
@@ -120,7 +139,7 @@ parsbot.on('message', message => { // get messages
         }); 
     }
 
-    function writeQuestion(question,answer)
+    function writeQuestion(question,answer) // Add question to questions.json
     {
         let soru = {  // question data
             soru: question,
@@ -138,10 +157,18 @@ parsbot.on('message', message => { // get messages
         return true;
     }
 
-    function listQuestions(){
+    function listQuestions(){ // List all questions / return questions json
         let  data = fs.readFileSync('questions.json');
             let json= JSON.parse(data);
             return json;
+    }
+
+    function deleteAllQuestions(){ // Delete all questions/ open new questions object
+        let json = {"questions":[]}
+        fs.writeFile("questions.json", JSON.stringify(json), function(err){
+            if (err) throw err;
+            });
+        return true;
     }
 
 }); // message end
