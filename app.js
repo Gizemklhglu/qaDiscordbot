@@ -37,6 +37,7 @@ parsbot.on('message', message => { // get messages
                 .setAuthor('Komutlar:')
                 .addField('Soru Ekle', 'Kullanımı: !soruekle, soru metni, cevap metni ')
                 .addField('Soruları Listele', 'Kullanımı: !sorulistele')
+                .addField('Soru Sil', 'Kullanımı: !sorusil,soruid')
                 .addField('Soruların Tümünü Sil', 'Kullanımı: !sorusilall')
                 message.channel.send(embed);
         }
@@ -88,7 +89,9 @@ parsbot.on('message', message => { // get messages
                 let count = Object.keys(questiondata.questions).length;
                 if(count!=0){
                     for (i = 0; i < count; i++) { // add questions
-                        embed.addField('Soru id: ' + i, 'Soru: ' + questiondata.questions[i].soru + ' Cevap: ' + questiondata.questions[i].cevap + ' Ekleyen Kullanıcı: ' + questiondata.questions[i].ekleyenkullanici);
+                        if(questiondata.questions[i]!=null){
+                            embed.addField('Soru id: ' + i, 'Soru: ' + questiondata.questions[i].soru + ' Cevap: ' + questiondata.questions[i].cevap + ' Ekleyen Kullanıcı: ' + questiondata.questions[i].ekleyenkullanici);
+                        }
                     }
                 }else{
                     embed.addField(" Şu an eklenmiş bir soru bulunmaktadır."," !soruekle, soru metni, cevap metni şeklinde yeni soru ekleyebilirsiniz")
@@ -97,7 +100,7 @@ parsbot.on('message', message => { // get messages
         }
     } // list question command end
 
-    else if (msg.startsWith(prefix + 'sorusilall')) { // delete questions command start
+    else if (msg.startsWith(prefix + 'sorusilall')) { // delete all questions command start
         if(!message.member.roles.find(r=>["Parsbot"].includes(r.name)))
         {
             message.channel.send(sender + " botu kullanım yetkiniz yok")
@@ -111,7 +114,30 @@ parsbot.on('message', message => { // get messages
                     message.channel.send(sender + " Soruların tümü başarıyla silindi")
                 }
         }
-    } // delete questions command end
+    } // delete all questions command end
+
+    else if (msg.startsWith(prefix + 'sorusil')) { // delete question command start
+        if(!message.member.roles.find(r=>["Parsbot"].includes(r.name)))
+        {
+            message.channel.send(sender + " botu kullanım yetkiniz yok")
+        }
+        else
+        {
+            writeLog("Soru Silme");
+            // command process
+            args.shift() // delete the command text
+            if(typeof args[0] === "undefined") // question id control
+            {
+                message.channel.send(sender + " Lütfen soru'idsini giriniz (!sorulistele ile öğrenebilirsiniz) Örnek: !sorusil,0")
+            }
+            else{
+            if(deleteQuestion(args[0].trim()))
+                {
+                    message.channel.send(sender + " soru başarıyla silindi")
+                }
+            }
+        }
+    } // delete question command end
     
     function writeLog(islem) {
         let log = {  // log data
@@ -161,6 +187,23 @@ parsbot.on('message', message => { // get messages
         let  data = fs.readFileSync('questions.json');
             let json= JSON.parse(data);
             return json;
+    }
+
+    function deleteQuestion(id){ // Delete all questions/ open new questions object
+        fs.readFile('questions.json', function (err, data) {
+            var json = JSON.parse(data);
+            json.questions[id] = undefined; // question[id] set null
+            var json2 = {"questions":[]} // clean json
+            for (var i=0; i<json.questions.length; i++){ // clear null
+                if(json.questions[i] != null){
+                    json2.questions.push(json.questions[i])
+                }
+            }
+            fs.writeFile("questions.json", JSON.stringify(json2), function(err){ // write clean json to questions.json
+            if (err) throw err;
+            });
+        });
+        return true;
     }
 
     function deleteAllQuestions(){ // Delete all questions/ open new questions object
