@@ -4,7 +4,7 @@ const moment = require('moment');
 const prefix = '!'; // message prefix
 const parsbot = new Discord.Client();
 
-parsbot.login('NDA5NDI5MzkzNDU1NDQ4MDY0.DfdYPA.oQIuUx1qKq8JXJF4hhl2yTKmLI0'); // discord token login
+parsbot.login('NDA5NDI5MzkzNDU1NDQ4MDY0.DfgBsw._aThU57fFtAAdIRDFGwqSUAItlQ'); // discord token login
 
 parsbot.on('ready', () => { // ready control
     console.log('Parsbot started')
@@ -37,6 +37,7 @@ parsbot.on('message', message => { // get messages
                 .setAuthor('Komutlar:')
                 .addField('Yardım', 'Kullanımı: !yardım')
                 .addField('Soru Ekle', 'Kullanımı: !soruekle, soru metni, cevap metni ')
+                .addField('Soruları Listele', 'Kullanımı: !sorulistele')
                 message.channel.send(embed);
         }
     } // help command end
@@ -66,8 +67,34 @@ parsbot.on('message', message => { // get messages
             }
         }
     } // add question command end
+
+    else if (msg.startsWith(prefix + 'sorulistele')) { // list question command start
+        if(!message.member.roles.find(r=>["Parsbot"].includes(r.name)))
+        {
+            message.channel.send(sender + " botu kullanım yetkiniz yok")
+        }
+        else
+        {
+            writeLog("Soru Listeleme");
+            // command process
+            let help_image = "https://i.imgsafe.org/5c/5c35c8adf3.png";
+            let color = "DB4545";
+            const embed = new Discord.RichEmbed()
+                .setThumbnail(help_image)
+                .setColor(color)
+                .setAuthor('Sorular:')
+
+                let questiondata = listQuestions(); // get questions
+                let count = Object.keys(questiondata.questions).length;
+
+                for (i = 0; i < count; i++) { // add questions
+                    embed.addField('Soru id: ' + i, 'Soru: ' + questiondata.questions[i].soru + ' Cevap: ' + questiondata.questions[i].cevap + ' Ekleyen Kullanıcı: ' + questiondata.questions[i].ekleyenkullanici);
+                }
+                message.channel.send(embed);
+        }
+    } // list question command end
     
-    function writeLog(islem) { 
+    function writeLog(islem) {
         let log = {  // log data
             islem: islem,
             kullanici: sender.username,
@@ -109,6 +136,12 @@ parsbot.on('message', message => { // get messages
             });
         });
         return true;
+    }
+
+    function listQuestions(){
+        let  data = fs.readFileSync('questions.json');
+            let json= JSON.parse(data);
+            return json;
     }
 
 }); // message end
