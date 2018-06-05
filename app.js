@@ -18,6 +18,7 @@ parsbot.on('message', message => { // get messages
     let args = msg.split(",");
     let today = moment(Date.now());
     let logchan = parsbot.channels.find("name", "parsbot-log");
+    let soruchan = parsbot.channels.find("name", "soru-sor");
 
     if (msgUpper === prefix + 'YARDIM') { // help command start 
         if(!message.member.roles.find(r=>["Parsbot"].includes(r.name))) // role control
@@ -39,6 +40,7 @@ parsbot.on('message', message => { // get messages
                 .addField('Soruları Listele', 'Kullanımı: !sorulistele')
                 .addField('Soru Sil', 'Kullanımı: !sorusil,soruid')
                 .addField('Soruların Tümünü Sil', 'Kullanımı: !sorusilall')
+                .addField('Soru Sor', 'Kullanımı: !sorusor,soruid')
                 message.channel.send(embed);
         }
     } // help command end
@@ -138,6 +140,44 @@ parsbot.on('message', message => { // get messages
             }
         }
     } // delete question command end
+
+    else if (msg.startsWith(prefix + 'sorusor')) { // send question command start
+        if(!message.member.roles.find(r=>["Parsbot"].includes(r.name)))
+        {
+            message.channel.send(sender + " botu kullanım yetkiniz yok")
+        }
+        else
+        {
+            writeLog("Soru Sor");
+            // command process
+            args.shift() // delete the command text
+            if(typeof args[0] === "undefined") // question id control
+            {
+                message.channel.send(sender + " Lütfen soru'idsini giriniz (!sorulistele ile öğrenebilirsiniz) Örnek: !sorusor,0")
+            }
+            else{
+                    if(soruchan) { // write question to question channel
+                        let json = listQuestions();
+                        if(json.questions[(args[0].trim())] != null){
+                            let help_image = "https://i.imgsafe.org/5c/5c35c8adf3.png";
+                            let color = "656abb";
+                            const embed = new Discord.RichEmbed()
+                            .setThumbnail(help_image)
+                            .setColor(color)
+                            .addField('Soru:',json.questions[(args[0].trim())].soru)
+                            soruchan.send(embed);
+                            message.channel.send(sender + " soru gönderimi başarılı")
+                        }
+                        else{
+                            message.channel.send(sender + " soru gönderimi başarısız")
+                        }
+                    }
+                    else{
+                        message.channel.send(sender + " soru gönderimi başarısız")
+                    }
+            }
+        }
+    } // send question command end
     
     function writeLog(islem) {
         let log = {  // log data
