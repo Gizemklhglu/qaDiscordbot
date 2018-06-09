@@ -249,6 +249,7 @@ parsbot.on('message', message => { // get messages
                     if(soruchan) { // write winner to question channel
                         let json = listQuestions();
                         if(json.questions[(args[0].trim())] != null){
+                            addWinner(args[1].trim());
                             let win_image = "https://i.imgsafe.org/bd/bd4ab251f6.png";
                             let color = "F5C92C";
                             const embed = new Discord.RichEmbed()
@@ -298,6 +299,7 @@ parsbot.on('message', message => { // get messages
                     if(soruchan) { // write winner manuel to question channel
                         let json = listQuestions();
                         if(args[0].trim() != null){
+                            addWinner(args[2].trim());
                             let win_image = "https://i.imgsafe.org/bd/bd4ab251f6.png";
                             let color = "F5C92C";
                             const embed = new Discord.RichEmbed()
@@ -390,6 +392,33 @@ parsbot.on('message', message => { // get messages
             var json = JSON.parse(data);
             json.questions.push(soru);    
             fs.writeFile("questions.json", JSON.stringify(json), function(err){
+            if (err) throw err;
+            });
+        });
+        return true;
+    }
+
+    function addWinner(username) // Add winner to winners.json
+    {
+        let winner = {  // winner data
+            user: username,
+            score: 1
+        };
+        var control=false;
+        fs.readFile('winners.json', function (err, data) {
+            var json = JSON.parse(data);
+            for (var i=0; i<json.winners.length; i++){
+                if(json.winners[i].user == username){
+                    json.winners[i].score+=1;
+                    control=true;
+                    break;
+                }
+            }
+        if(control==false || json.winners.length==0)
+        {
+            json.winners.push(winner);
+        }
+            fs.writeFile("winners.json", JSON.stringify(json), function(err){
             if (err) throw err;
             });
         });
