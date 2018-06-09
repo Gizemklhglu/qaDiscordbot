@@ -36,6 +36,7 @@ parsbot.on('message', message => { // get messages
                 .setThumbnail(help_image)
                 .setColor(color)
                 .setAuthor('Komutlar:')
+                .addField('Mesaj Gönderme', 'Kullanımı: !yaz,metin')
                 .addField('Soru Ekle', 'Kullanımı: !soruekle, soru metni, cevap metni ')
                 .addField('Soruları Listele', 'Kullanımı: !sorulistele')
                 .addField('Soru Sil', 'Kullanımı: !sorusil,soruid')
@@ -319,6 +320,37 @@ parsbot.on('message', message => { // get messages
             }
         }
     } // determine the winner manuel command end
+
+    else if (msg.startsWith(prefix + 'yaz')) { // send message command start
+        if(!message.member.roles.find(r=>["Parsbot"].includes(r.name)))
+        {
+            message.channel.send(sender + " botu kullanım yetkiniz yok")
+        }
+        else
+        {
+            writeLog("Mesaj Gönderme");
+            // command process
+            args.shift() // delete the command text
+            if(typeof args[0] === "undefined") // message control
+            {
+                message.channel.send(sender + " Lütfen mesajınızı giriniz Örnek: !yaz,Arkadaşlar bugün 3 soru sorulacaktır.")
+            }
+            else{
+                    if(soruchan) { // write message to question channel
+                        if(args[0].trim() != null){
+                            soruchan.send(args[0].trim());
+                            message.channel.send(sender + " mesaj gönderimi başarılı")
+                        }
+                        else{
+                            message.channel.send(sender + " mesaj gönderimi başarısız")
+                        }
+                    }
+                    else{
+                        message.channel.send(sender + " mesaj gönderimi başarısız")
+                    }
+            }
+        }
+    } // send message command end
     
     function writeLog(islem) {
         let log = {  // log data
