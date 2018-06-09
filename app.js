@@ -45,7 +45,8 @@ parsbot.on('message', message => { // get messages
                 .addField('Zaman Ayarlı Soru Sor (Soruyu .. dakika sonra gönderir)', 'Kullanımı: !zsorusor,soruid,kaç dakika sonra sorulacağı')
                 .addField('Kazanan Belirle', 'Kullanımı: !kazbel,soruid,kazanan kullanıcı adı')
                 .addField('Manuel Kazanan Belirle', 'Kullanımı: !mkazbel,soru metni,cevap metni,kazanan kullanıcı adı')
-                .addField('Skor Tablosu', 'Kullanımı: !skor')
+                .addField('Skor Tablosu', 'Kullanımı: !skor (Kullanıcılar için)')
+                .addField('İstatistik', 'Kullanımı: !istatistik')
                 message.channel.send(embed);
         }
     } // help command end
@@ -92,7 +93,7 @@ parsbot.on('message', message => { // get messages
                 .setColor(color)
                 .setAuthor('Sorular:')
 
-                let questiondata = listQuestions(); // get questions
+                let questiondata = listJson("questions.json"); // get questions
                 let count = Object.keys(questiondata.questions).length;
                 if(count!=0){
                     for (i = 0; i < count; i++) { // add questions
@@ -162,7 +163,7 @@ parsbot.on('message', message => { // get messages
             }
             else{
                     if(soruchan) { // write question to question channel
-                        let json = listQuestions();
+                        let json = listJson("questions.json");
                         if(json.questions[(args[0].trim())] != null){
                             let help_image = "https://i.imgsafe.org/5c/5c35c8adf3.png";
                             let color = "1C8ADB";
@@ -204,7 +205,7 @@ parsbot.on('message', message => { // get messages
             }
             else{
                     if(soruchan) { // write question to question channel
-                        let json = listQuestions();
+                        let json = listJson("questions.json");
                         if(json.questions[(args[0].trim())] != null){
                             setTimeout(function() {
                             let help_image = "https://i.imgsafe.org/5c/5c35c8adf3.png";
@@ -248,7 +249,7 @@ parsbot.on('message', message => { // get messages
             }
             else{
                     if(soruchan) { // write winner to question channel
-                        let json = listQuestions();
+                        let json = listJson("questions.json");
                         if(json.questions[(args[0].trim())] != null){
                             addWinner(args[1].trim());
                             let win_image = "https://i.imgsafe.org/bd/bd4ab251f6.png";
@@ -281,7 +282,7 @@ parsbot.on('message', message => { // get messages
         }
         else
         {
-            writeLog("Kazanan Belirleme");
+            writeLog("Manuel Kazanan Belirleme");
             // command process
             args.shift() // delete the command text
             if(typeof args[0] === "undefined") // question id control
@@ -298,7 +299,7 @@ parsbot.on('message', message => { // get messages
             }
             else{
                     if(soruchan) { // write winner manuel to question channel
-                        let json = listQuestions();
+                        let json = listJson("questions.json");
                         if(args[0].trim() != null){
                             addWinner(args[2].trim());
                             let win_image = "https://i.imgsafe.org/bd/bd4ab251f6.png";
@@ -366,12 +367,12 @@ parsbot.on('message', message => { // get messages
                 .setColor(color)
                 .setAuthor('Skor Listesi | TOP 10:')
 
-                let winnerdata = listWinners(); // get winners
+                let winnerdata = listJson("winners.json"); // get winners
                 let data = sortProperties(winnerdata.winners,"score",true,true);
                 let count = data.length;
                 if(count!=0){
                     for (i = 0; i < 10; i++) { // write winners to embed
-                        if(data[i][1]!=null){
+                        if(data[i]!=null){
                             embed.addField('Sıra: ' + (i+1), 'Kullanıcı: ' + data[i][1].user + ' Skor: ' + data[i][1].score);
                         }
                     }
@@ -381,6 +382,48 @@ parsbot.on('message', message => { // get messages
                 message.channel.send(embed); // send embed to message channel
         }
     } // score board command end
+
+    else if (msg.startsWith(prefix + 'istatistik')) { // stats command start
+        if(soruchan) {
+            writeLog("istatistik Görüntüleme");
+            var soruekleme=0,sorusor=0,kazananbelirleme=0;
+            // command process
+            let stats_image = "https://i.imgsafe.org/c4/c45e08a839.png";
+            let color = "38efab";
+            const embed = new Discord.RichEmbed()
+                .setThumbnail(stats_image)
+                .setColor(color)
+                .setAuthor('İstatistikler:')
+                let logsdata = listJson("logs.json"); // get logs
+                let count = logsdata.logs.length;
+                if(count!=0){
+                    for (i = 0; i < count; i++) { // get count stats
+                        if(logsdata.logs[i]!=null){
+                            let islem = logsdata.logs[i].islem;
+                            if (islem == "Soru Ekleme")
+                            {
+                                soruekleme+=1;
+                            }
+                            else if(islem == "Soru Sor" || islem == "Beklemeli Soru Sor")
+                            {
+                                sorusor+=1;
+                            }
+                            else if(islem == "Kazanan Belirleme" || islem == "Manuel Kazanan Belirleme" )
+                            {
+                                kazananbelirleme+=1;
+                            }
+                        }
+                    }
+                    embed.addField('Eklenen Soru Sayısı: ', soruekleme);
+                    embed.addField('Sorulan Soru Sayısı: ', sorusor);
+                    embed.addField('Kazanan Kullanıcı Sayısı: ', kazananbelirleme);
+                    embed.addField('Atılan Vote: ', kazananbelirleme*3 +"$");
+                }else{
+                    embed.addField(" Üzgünüz","  Sistemde şu an istatistik bulunmamaktadır.")
+                }
+                message.channel.send(embed); // send embed to message channel
+        }
+    } // stats command end
     
     function writeLog(islem) {
         let log = {  // log data
@@ -453,14 +496,8 @@ parsbot.on('message', message => { // get messages
         return true;
     }
 
-    function listQuestions(){ // List all questions / return questions json
-        let  data = fs.readFileSync('questions.json');
-            let json= JSON.parse(data);
-            return json;
-    }
-
-    function listWinners(){ // List all winners / return winners json
-        let  data = fs.readFileSync('winners.json');
+    function listJson(jsonfile){ // List all json file /return json data
+        let  data = fs.readFileSync(jsonfile);
             let json= JSON.parse(data);
             return json;
     }
