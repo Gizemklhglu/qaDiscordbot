@@ -30,10 +30,8 @@ parsbot.on('message', message => { // get messages
             writeLog("Yardım komutu"); // write log function
 
             // command process
-            let help_image = "https://i.imgsafe.org/5c/5c35c8adf3.png";
             let color = "1C8ADB";
             const embed = new Discord.RichEmbed() // define embed and send
-                .setThumbnail(help_image)
                 .setColor(color)
                 .setAuthor('Komutlar:')
                 .addField('Mesaj Gönderme', 'Kullanımı: !yaz,metin')
@@ -86,10 +84,8 @@ parsbot.on('message', message => { // get messages
         {
             writeLog("Soru Listeleme");
             // command process
-            let help_image = "https://i.imgsafe.org/5c/5c35c8adf3.png";
             let color = "DB4545";
             const embed = new Discord.RichEmbed()
-                .setThumbnail(help_image)
                 .setColor(color)
                 .setAuthor('Sorular:')
 
@@ -165,10 +161,8 @@ parsbot.on('message', message => { // get messages
                     if(soruchan) { // write question to question channel
                         let json = listJson("questions.json");
                         if(json.questions[(args[0].trim())] != null){
-                            let help_image = "https://i.imgsafe.org/5c/5c35c8adf3.png";
                             let color = "1C8ADB";
                             const embed = new Discord.RichEmbed()
-                            .setThumbnail(help_image)
                             .setColor(color)
                             .addField('Soru:',json.questions[(args[0].trim())].soru)
                             soruchan.send(embed);
@@ -208,10 +202,8 @@ parsbot.on('message', message => { // get messages
                         let json = listJson("questions.json");
                         if(json.questions[(args[0].trim())] != null){
                             setTimeout(function() {
-                            let help_image = "https://i.imgsafe.org/5c/5c35c8adf3.png";
                             let color = "1C8ADB";
                             const embed = new Discord.RichEmbed()
-                            .setThumbnail(help_image)
                             .setColor(color)
                             .addField('Soru:',json.questions[(args[0].trim())].soru)
                             soruchan.send(embed);
@@ -252,10 +244,8 @@ parsbot.on('message', message => { // get messages
                         let json = listJson("questions.json");
                         if(json.questions[(args[0].trim())] != null){
                             addWinner(args[1].trim());
-                            let win_image = "https://i.imgsafe.org/bd/bd4ab251f6.png";
                             let color = "F5C92C";
                             const embed = new Discord.RichEmbed()
-                            .setThumbnail(win_image)
                             .setColor(color)
                             .setAuthor("Tebrikler")
                             .addField('Kazanan Kullanıcı:',args[1].trim())
@@ -302,10 +292,8 @@ parsbot.on('message', message => { // get messages
                         let json = listJson("questions.json");
                         if(args[0].trim() != null){
                             addWinner(args[2].trim());
-                            let win_image = "https://i.imgsafe.org/bd/bd4ab251f6.png";
                             let color = "F5C92C";
                             const embed = new Discord.RichEmbed()
-                            .setThumbnail(win_image)
                             .setColor(color)
                             .setAuthor("Tebrikler")
                             .addField('Kazanan Kullanıcı:',args[2].trim())
@@ -360,10 +348,8 @@ parsbot.on('message', message => { // get messages
         if(soruchan) {
             writeLog("Skor Görüntüleme");
             // command process
-            let win_image = "https://i.imgsafe.org/bd/bd4ab251f6.png";
             let color = "F5C92C";
             const embed = new Discord.RichEmbed()
-                .setThumbnail(win_image)
                 .setColor(color)
                 .setAuthor('Skor Listesi | TOP 10:')
 
@@ -388,10 +374,8 @@ parsbot.on('message', message => { // get messages
             writeLog("istatistik Görüntüleme");
             var soruekleme=0,sorusor=0,kazananbelirleme=0;
             // command process
-            let stats_image = "https://i.imgsafe.org/c4/c45e08a839.png";
             let color = "38efab";
             const embed = new Discord.RichEmbed()
-                .setThumbnail(stats_image)
                 .setColor(color)
                 .setAuthor('İstatistikler:')
                 let logsdata = listJson("logs.json"); // get logs
@@ -554,5 +538,3 @@ parsbot.on('message', message => { // get messages
     }
 
 }); // message end
-
-//IMAGE SOURCES :pixabay.com
