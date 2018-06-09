@@ -41,6 +41,7 @@ parsbot.on('message', message => { // get messages
                 .addField('Soru Sil', 'Kullanımı: !sorusil,soruid')
                 .addField('Soruların Tümünü Sil', 'Kullanımı: !sorusilall')
                 .addField('Soru Sor', 'Kullanımı: !sorusor,soruid')
+                .addField('Zaman Ayarlı Soru Sor (Soruyu .. dakika sonra gönderir)', 'Kullanımı: !zsorusor,soruid,kaçdakikasonrasorulacağı')
                 message.channel.send(embed);
         }
     } // help command end
@@ -128,7 +129,7 @@ parsbot.on('message', message => { // get messages
             writeLog("Soru Silme");
             // command process
             args.shift() // delete the command text
-            if(typeof args[0] === "undefined") // question id control
+            if(typeof args[0] === "undefined" || !args[0].match(/^-{0,1}\d+$/)) // question id control
             {
                 message.channel.send(sender + " Lütfen soru'idsini giriniz (!sorulistele ile öğrenebilirsiniz) Örnek: !sorusil,0")
             }
@@ -151,7 +152,7 @@ parsbot.on('message', message => { // get messages
             writeLog("Soru Sor");
             // command process
             args.shift() // delete the command text
-            if(typeof args[0] === "undefined") // question id control
+            if(typeof args[0] === "undefined" || !args[0].match(/^-{0,1}\d+$/)) // question id control
             {
                 message.channel.send(sender + " Lütfen soru'idsini giriniz (!sorulistele ile öğrenebilirsiniz) Örnek: !sorusor,0")
             }
@@ -178,6 +179,50 @@ parsbot.on('message', message => { // get messages
             }
         }
     } // send question command end
+
+    else if (msg.startsWith(prefix + 'zsorusor')) { // send question with delay command start
+        if(!message.member.roles.find(r=>["Parsbot"].includes(r.name)))
+        {
+            message.channel.send(sender + " botu kullanım yetkiniz yok")
+        }
+        else
+        {
+            writeLog("Beklemeli Soru Sor");
+            // command process
+            args.shift() // delete the command text
+            if(typeof args[0] === "undefined" || !args[0].match(/^-{0,1}\d+$/)) // question id control
+            {
+                message.channel.send(sender + " Lütfen soru'idsini giriniz (!sorulistele ile öğrenebilirsiniz) Örnek: !sorusor,0")
+            }
+            else if(typeof args[1] === "undefined" || !args[1].match(/^-{0,1}\d+$/)) // delay time control
+            {
+                message.channel.send(sender + " Lütfen dakika cinsinden bekleme süresini giriniz (!sorulistele ile öğrenebilirsiniz) Örnek: !sorusor,0")
+            }
+            else{
+                    if(soruchan) { // write question to question channel
+                        let json = listQuestions();
+                        if(json.questions[(args[0].trim())] != null){
+                            setTimeout(function() {
+                            let help_image = "https://i.imgsafe.org/5c/5c35c8adf3.png";
+                            let color = "656abb";
+                            const embed = new Discord.RichEmbed()
+                            .setThumbnail(help_image)
+                            .setColor(color)
+                            .addField('Soru:',json.questions[(args[0].trim())].soru)
+                            soruchan.send(embed);
+                        }, args[1] * 60000);
+                            message.channel.send(sender + " soru gönderimi başarılı, sorunuz " + args[1] +" dakika sonra gönderilecektir.")
+                        }
+                        else{
+                            message.channel.send(sender + " soru gönderimi başarısız")
+                        }
+                    }
+                    else{
+                        message.channel.send(sender + " soru gönderimi başarısız")
+                    }
+            }
+        }
+    } // send question with delay command end
     
     function writeLog(islem) {
         let log = {  // log data
