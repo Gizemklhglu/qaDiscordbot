@@ -45,6 +45,7 @@ parsbot.on('message', message => { // get messages
                 .addField('Zaman Ayarlı Soru Sor (Soruyu .. dakika sonra gönderir)', 'Kullanımı: !zsorusor,soruid,kaç dakika sonra sorulacağı')
                 .addField('Kazanan Belirle', 'Kullanımı: !kazbel,soruid,kazanan kullanıcı adı')
                 .addField('Manuel Kazanan Belirle', 'Kullanımı: !mkazbel,soru metni,cevap metni,kazanan kullanıcı adı')
+                .addField('Skor Tablosu', 'Kullanımı: !skor')
                 message.channel.send(embed);
         }
     } // help command end
@@ -353,6 +354,33 @@ parsbot.on('message', message => { // get messages
             }
         }
     } // send message command end
+
+    else if (msg.startsWith(prefix + 'skor')) { // score board command start
+        if(soruchan) {
+            writeLog("Skor Görüntüleme");
+            // command process
+            let win_image = "https://i.imgsafe.org/bd/bd4ab251f6.png";
+            let color = "F5C92C";
+            const embed = new Discord.RichEmbed()
+                .setThumbnail(win_image)
+                .setColor(color)
+                .setAuthor('Skor Listesi | TOP 10:')
+
+                let winnerdata = listWinners(); // get winners
+                let data = sortProperties(winnerdata.winners,"score",true,true);
+                let count = data.length;
+                if(count!=0){
+                    for (i = 0; i < 10; i++) { // write winners to embed
+                        if(data[i][1]!=null){
+                            embed.addField('Sıra: ' + (i+1), 'Kullanıcı: ' + data[i][1].user + ' Skor: ' + data[i][1].score);
+                        }
+                    }
+                }else{
+                    embed.addField(" Üzgünüz","  Sistemde şu an kazanan kullanıcı bulunmamaktadır.")
+                }
+                message.channel.send(embed); // send embed to message channel
+        }
+    } // score board command end
     
     function writeLog(islem) {
         let log = {  // log data
@@ -429,6 +457,38 @@ parsbot.on('message', message => { // get messages
         let  data = fs.readFileSync('questions.json');
             let json= JSON.parse(data);
             return json;
+    }
+
+    function listWinners(){ // List all winners / return winners json
+        let  data = fs.readFileSync('winners.json');
+            let json= JSON.parse(data);
+            return json;
+    }
+
+    function sortProperties(obj, sortedBy, isNumericSort, reverse) { // object sort function
+        sortedBy = sortedBy || 1; // by default first key
+        isNumericSort = isNumericSort || false; // by default text sort
+        reverse = reverse || false; // by default no reverse
+
+        var reversed = (reverse) ? -1 : 1;
+
+        var sortable = [];
+        for (var key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                sortable.push([key, obj[key]]);
+            }
+        }
+        if (isNumericSort)
+            sortable.sort(function (a, b) {
+                return reversed * (a[1][sortedBy] - b[1][sortedBy]);
+            });
+        else
+            sortable.sort(function (a, b) {
+                var x = a[1][sortedBy].toLowerCase(),
+                    y = b[1][sortedBy].toLowerCase();
+                return x < y ? reversed * -1 : x > y ? reversed : 0;
+            });
+        return sortable;
     }
 
     function deleteQuestion(id){ // Delete all questions/ open new questions object
