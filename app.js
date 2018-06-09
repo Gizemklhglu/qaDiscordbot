@@ -41,7 +41,9 @@ parsbot.on('message', message => { // get messages
                 .addField('Soru Sil', 'Kullanımı: !sorusil,soruid')
                 .addField('Soruların Tümünü Sil', 'Kullanımı: !sorusilall')
                 .addField('Soru Sor', 'Kullanımı: !sorusor,soruid')
-                .addField('Zaman Ayarlı Soru Sor (Soruyu .. dakika sonra gönderir)', 'Kullanımı: !zsorusor,soruid,kaçdakikasonrasorulacağı')
+                .addField('Zaman Ayarlı Soru Sor (Soruyu .. dakika sonra gönderir)', 'Kullanımı: !zsorusor,soruid,kaç dakika sonra sorulacağı')
+                .addField('Kazanan Belirle', 'Kullanımı: !kazbel,soruid,kazanan kullanıcı adı')
+                .addField('Manuel Kazanan Belirle', 'Kullanımı: !mkazbel,soru metni,cevap metni,kazanan kullanıcı adı')
                 message.channel.send(embed);
         }
     } // help command end
@@ -161,7 +163,7 @@ parsbot.on('message', message => { // get messages
                         let json = listQuestions();
                         if(json.questions[(args[0].trim())] != null){
                             let help_image = "https://i.imgsafe.org/5c/5c35c8adf3.png";
-                            let color = "656abb";
+                            let color = "1C8ADB";
                             const embed = new Discord.RichEmbed()
                             .setThumbnail(help_image)
                             .setColor(color)
@@ -192,11 +194,11 @@ parsbot.on('message', message => { // get messages
             args.shift() // delete the command text
             if(typeof args[0] === "undefined" || !args[0].match(/^-{0,1}\d+$/)) // question id control
             {
-                message.channel.send(sender + " Lütfen soru'idsini giriniz (!sorulistele ile öğrenebilirsiniz) Örnek: !sorusor,0")
+                message.channel.send(sender + " Lütfen soru'idsini giriniz (!sorulistele ile öğrenebilirsiniz) Örnek: !zsorusor,0,5")
             }
             else if(typeof args[1] === "undefined" || !args[1].match(/^-{0,1}\d+$/)) // delay time control
             {
-                message.channel.send(sender + " Lütfen dakika cinsinden bekleme süresini giriniz (!sorulistele ile öğrenebilirsiniz) Örnek: !sorusor,0")
+                message.channel.send(sender + " Lütfen dakika cinsinden bekleme süresini giriniz Örnek: !zsorusor,0,1")
             }
             else{
                     if(soruchan) { // write question to question channel
@@ -204,7 +206,7 @@ parsbot.on('message', message => { // get messages
                         if(json.questions[(args[0].trim())] != null){
                             setTimeout(function() {
                             let help_image = "https://i.imgsafe.org/5c/5c35c8adf3.png";
-                            let color = "656abb";
+                            let color = "1C8ADB";
                             const embed = new Discord.RichEmbed()
                             .setThumbnail(help_image)
                             .setColor(color)
@@ -223,6 +225,100 @@ parsbot.on('message', message => { // get messages
             }
         }
     } // send question with delay command end
+
+    else if (msg.startsWith(prefix + 'kazbel')) { // determine the winner command start
+        if(!message.member.roles.find(r=>["Parsbot"].includes(r.name)))
+        {
+            message.channel.send(sender + " botu kullanım yetkiniz yok")
+        }
+        else
+        {
+            writeLog("Kazanan Belirleme");
+            // command process
+            args.shift() // delete the command text
+            if(typeof args[0] === "undefined" || !args[0].match(/^-{0,1}\d+$/)) // question id control
+            {
+                message.channel.send(sender + " Lütfen soru'idsini giriniz (!sorulistele ile öğrenebilirsiniz) Örnek: !sorulistele")
+            }
+            else if(typeof args[1] === "undefined") // username control
+            {
+                message.channel.send(sender + " Lütfen kazanan kullanıcı adını giriniz Örnek: !kazbel,0,pars11")
+            }
+            else{
+                    if(soruchan) { // write winner to question channel
+                        let json = listQuestions();
+                        if(json.questions[(args[0].trim())] != null){
+                            let win_image = "https://i.imgsafe.org/bd/bd4ab251f6.png";
+                            let color = "F5C92C";
+                            const embed = new Discord.RichEmbed()
+                            .setThumbnail(win_image)
+                            .setColor(color)
+                            .setAuthor("Tebrikler")
+                            .addField('Kazanan Kullanıcı:',args[1].trim())
+                            .addField('Soru:',json.questions[(args[0].trim())].soru)
+                            .addField('Cevap:',json.questions[(args[0].trim())].cevap)
+                            soruchan.send(embed);
+                            message.channel.send(sender + " kazanan belirleme başarılı.")
+                        }
+                        else{
+                            message.channel.send(sender + " kazanan belirleme başarısız")
+                        }
+                    }
+                    else{
+                        message.channel.send(sender + " kazanan belirleme başarısız")
+                    }
+            }
+        }
+    } // determine the winner command end
+
+    else if (msg.startsWith(prefix + 'mkazbel')) { // determine the winner manuel command start
+        if(!message.member.roles.find(r=>["Parsbot"].includes(r.name)))
+        {
+            message.channel.send(sender + " botu kullanım yetkiniz yok")
+        }
+        else
+        {
+            writeLog("Kazanan Belirleme");
+            // command process
+            args.shift() // delete the command text
+            if(typeof args[0] === "undefined") // question id control
+            {
+                message.channel.send(sender + " Lütfen soru metnini giriniz Örnek: !mkazbel,sorumetni,cevapmetni,kullanıcı adı")
+            }
+            else if(typeof args[1] === "undefined") // username control
+            {
+                message.channel.send(sender + " Lütfen cevap metnini giriniz Örnek: !mkazbel,sorumetni,cevapmetni,kullanıcı adı")
+            }
+            else if(typeof args[2] === "undefined") // username control
+            {
+                message.channel.send(sender + " Lütfen kazanan kullanıcı adını giriniz Örnek: !mkazbel,sorumetni,cevapmetni,kullanıcı adı")
+            }
+            else{
+                    if(soruchan) { // write winner manuel to question channel
+                        let json = listQuestions();
+                        if(args[0].trim() != null){
+                            let win_image = "https://i.imgsafe.org/bd/bd4ab251f6.png";
+                            let color = "F5C92C";
+                            const embed = new Discord.RichEmbed()
+                            .setThumbnail(win_image)
+                            .setColor(color)
+                            .setAuthor("Tebrikler")
+                            .addField('Kazanan Kullanıcı:',args[2].trim())
+                            .addField('Soru:',args[0].trim())
+                            .addField('Cevap:',args[1].trim())
+                            soruchan.send(embed);
+                            message.channel.send(sender + " kazanan belirleme başarılı.")
+                        }
+                        else{
+                            message.channel.send(sender + " kazanan belirleme başarısız")
+                        }
+                    }
+                    else{
+                        message.channel.send(sender + " kazanan belirleme başarısız")
+                    }
+            }
+        }
+    } // determine the winner manuel command end
     
     function writeLog(islem) {
         let log = {  // log data
@@ -300,3 +396,5 @@ parsbot.on('message', message => { // get messages
     }
 
 }); // message end
+
+//IMAGE SOURCES :pixabay.com
