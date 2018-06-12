@@ -1,0 +1,29 @@
+{
+  "name": "qadiscordbot",
+  "version": "1.0.0",
+  "description": "question answer discord bot",
+  "main": "app.js",
+  "dependencies": {
+    "discord.js": "^11.3.2",
+    "fs": "^0.0.1-security",
+    "moment": "^2.22.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "!help"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pars11/qaDiscordbot.git"
+  },
+  "keywords": [
+    "discord",
+    "qabot"
+  ],
+  "author": "Samet Aydın (pars11)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pars11/qaDiscordbot/issues"
+  },
+  "homepage": "https://github.com/pars11/qaDiscordbot#readme"
+}
